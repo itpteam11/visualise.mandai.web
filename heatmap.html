@@ -62,35 +62,35 @@
             <aside>
                 <div id="sidebar"  class="nav-collapse ">
                 <!-- sidebar menu start-->
-                <ul class="sidebar-menu" id="nav-accordion">
-              
-                    <li>
-                        <p class="centered"><img src="assets/img/logo-sgZoo.png" width="60"></p>
-                    </li>
-              	  	
-                    <!--<li class="mt">-->
-                    <li class="sub-menu">
-                        <a class="active" href="index.html">
-                            <i class="fa fa-dashboard"></i>
-                            <span>Footfall Analytic</span>
-                        </a>
-                        <ul class="sub">
-                            <li><a  href="index.html">Line Chart</a></li>
-                            <li><a  href="heatmap.html">Heat Map</a></li>
-                        </ul>
-                    </li>
+                    <ul class="sidebar-menu" id="nav-accordion">
 
-                    <li class="sub-menu">
-                        <a href="javascript:;" >
-                            <i class=" fa fa-bar-chart-o"></i>
-                            <span>Social Media Analytic</span>
-                        </a>
-                    </li>
+                        <li>
+                            <p class="centered"><img src="assets/img/logo-sgZoo.png" width="60"></p>
+                        </li>
 
-                </ul>
-                <!-- sidebar menu end-->
-            </div>
-        </aside>
+                        <!--<li class="mt">-->
+                        <li class="sub-menu">
+                            <a class="active" href="index.html">
+                                <i class="fa fa-dashboard"></i>
+                                <span>Footfall Analytic</span>
+                            </a>
+                            <ul class="sub">
+                                <li><a  href="index.html">Line Chart</a></li>
+                                <li><a  href="heatmap.html">Heat Map</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="sub-menu">
+                            <a href="javascript:;" >
+                                <i class=" fa fa-bar-chart-o"></i>
+                                <span>Social Media Analytic</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                    <!-- sidebar menu end-->
+                </div>
+            </aside>
             <!--sidebar end-->
             
             <!-- **********************************************************************************************************************************************************
@@ -102,6 +102,41 @@
                 <section class="wrapper">
                     <h3><i class="fa fa-angle-right"></i> Heatmap</h3>
                     <!-- page start-->
+                    <div id="morris">
+                        <div class="col-lg-2">
+                            <div class="form-panel">
+                                <h4 class="mb">
+                                    <i class="fa fa-angle-right"></i>
+                                     Manpower Allocation
+                                </h4>
+                                <form class="form-horizontal style-form" action method="get">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-sm-4 control-label">Staff Name: </label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 col-sm-4 control-label">Destination </label>
+                                        <div class="col-sm-8">
+                                            <select class="form-control">
+                                                <option>Ah Meng Restaurant</option>
+                                                <option>Amphitheatre</option>
+                                                <option>Australian Outback</option>
+                                                <option>Elephant Show</option>
+                                                <option>Entrance behind ticket counters</option>
+                                                <option>KFC Restaurant at KidzWorld</option>
+                                                <option>SPH Kiosk</option>
+                                                <option>Taxi Stand</option>
+                                                <option>WHRC</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div id="map"></div>
                     <!-- page end-->
                 </section>          
@@ -163,7 +198,11 @@
                 ["Region: <b>Ah Meng Restaurant</b><br>Total Visitor: 179<br>Returning Visitor: 25<br>Total Staff: 5",
                 1.40415, 103.79355],
                 ["Region: <b>WHRC</b><br>Total Visitor: 71<br>Returning Visitor: 52<br>Total Staff: 8",
-                1.40400, 103.79146]
+                1.40400, 103.79146],
+                ["Region: <b>Taxi STand</b><br>Total Visitor: 71<br>Returning Visitor: 52<br>Total Staff: 8",
+                1.40471, 103.79049],
+                ["Region: <b>Elephant Show</b><br>Total Visitor: 71<br>Returning Visitor: 52<br>Total Staff: 8",
+                1.40527, 103.79565]
             ]
 
             
@@ -207,6 +246,30 @@
             layer = heatmapLayer;
         };  
 
+        </script>
+        
+        <script>
+            function drag_start(event) {
+                var style = window.getComputedStyle(event.target, null);
+                event.dataTransfer.setData("text/plain",
+                (parseInt(style.getPropertyValue("left"),10) - event.clientX) + ',' + (parseInt(style.getPropertyValue("top"),10) - event.clientY));
+            } 
+            function drag_over(event) { 
+                event.preventDefault(); 
+                return false; 
+            } 
+            function drop(event) { 
+                var offset = event.dataTransfer.getData("text/plain").split(',');
+                var dm = document.getElementById('dragme');
+                dm.style.left = (event.clientX + parseInt(offset[0],10)) + 'px';
+                dm.style.top = (event.clientY + parseInt(offset[1],10)) + 'px';
+                event.preventDefault();
+                return false;
+            } 
+            var dm = document.getElementById('dragme'); 
+            dm.addEventListener('dragstart',drag_start,false); 
+            document.body.addEventListener('dragover',drag_over,false); 
+            document.body.addEventListener('drop',drop,false); 
         </script>
   
 
