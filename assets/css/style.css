@@ -43,8 +43,7 @@ a, a:hover, a:focus {
 }
 
 #map {
-    width: 1880px;
-    height: 840px;
+    height: 540px;
 }
 
 .leaflet-container {
