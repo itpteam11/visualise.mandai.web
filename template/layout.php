@@ -23,6 +23,8 @@
         <link href="assets/css/c3.min.css" rel="stylesheet">
         <link href="assets/css/leaflet.css" rel="stylesheet" >
         
+        <link href="assets/css/Icon.Label.css" rel="stylesheet" />
+        
         <script src="assets/js/jquery-1.8.3.min.js"></script>
         <script src="assets/js/jquery-ui/jquery-ui.min.js"></script>
         <script src="assets/js/d3.min.js"></script>
@@ -31,6 +33,9 @@
         <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
         <script src="assets/js/build/heatmap.js"></script>
         <script src="assets/js/plugins/leaflet-heatmap.js"></script>
+        
+        <script src="assets/js/leaflet-iconlabel/Icon.Label.js"></script>
+	<script src="assets/js/leaflet-iconlabel/Icon.Label.Default.js"></script>
     </head>
 
     <body>
@@ -76,8 +81,18 @@
                                 <span>Footfall Analytic</span>
                             </a>
                             <ul class="sub">
-                                <li><a href="index.php">Chart</a></li>
+                                <li><a href="index.php">Dashboard</a></li>
                                 <li><a href="index.php?page=heatmap">Heat Map</a></li>
+                            </ul>
+                        </li>
+                        <li class="sub-menu">
+                            <a class="active" href="#">
+                                <i class="fa fa-tasks"></i>
+                                <span>Admin Tool</span>
+                            </a>
+                            <ul class="sub">
+                                <li><a href="index.php?page=threshold">Treshold Setting</a></li>
+                                <li><a href="index.php?page=userlist">Manage User</a></li>
                             </ul>
                         </li>
 <!--

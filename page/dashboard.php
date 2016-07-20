@@ -7,7 +7,6 @@ $threads = 10;
 $forecast = new Forecast('f2bf4fe3c92a3385cddae35a69436398', $threads);
 $apiURL = 'https://api.analytics.lbasense.com/StatsSummary?';
 //$apiURL = 'https://api.analytics.lbasense.com/VisitorCounts?';
-
 // Singapore Zoo
 $latitude = 1.404359;
 $longitude = 103.793012;
@@ -307,16 +306,25 @@ $avgDuration_json .= "]";
                         </form>      		
                     </div><!-- /form-panel -->
 
-
                     <div class="content-panel">
                         <h4><i class="fa fa-angle-right"></i> Tweet</h4>
-                        <div class="panel-body">
-                            Work in Progress!
-                        </div>
+
+                            <div class="ds">
+                                <div class="desc">
+                                    <div class="thumb">
+                                        <span class="badge bg-theme"><i class="fa fa-clock-o"></i></span>
+                                    </div>
+                                    <div class="details">
+                                        <p><muted>2 Minutes Ago</muted><br>
+                                        <a href="#">James Brown</a> subscribed to your newsletter.<br>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                     </div>
 
                 </div><!-- /col-lg-4 -->
-
 
 
                 <div class="col-lg-9 col-md-9 col-sm-9 mb">
