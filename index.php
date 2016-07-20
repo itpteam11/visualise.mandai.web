@@ -1,4 +1,5 @@
 <?php
+set_time_limit(0);
 
 //http://stackoverflow.com/questions/22388647/how-to-use-a-php-library-with-namespacing-without-composer-as-dependency
 function __autoload($className)
@@ -29,6 +30,22 @@ if(isset($_GET["page"])){
         case "heatmap":
             echo $templates->render('../page/heatmap', ['page_title' => 'Live Footfall Heatmap']);
             break;
+        
+        case "threshold":
+            echo $templates->render('../page/threshold', ['page_title' => 'Footfall Threshold Setting']);
+            break;           
+        
+        case "userlist":
+            echo $templates->render('../page/userlist', ['page_title' => 'Manage User']);
+            break; 
+        
+        case "adduser":
+            echo $templates->render('../page/adduser', ['page_title' => 'Add User']);
+            break;
+        
+        case "edituser":
+            echo $templates->render('../page/edituser', ['page_title' => 'Edit User']);
+            break; 
         
         case "dashboard":
         default:
