@@ -285,7 +285,7 @@ $avgDuration_json .= "]";
                         <form class="form-horizontal style-form" action="" method="get">
                             <div class="form-group">
                                 <div class="col-sm-4 col-sm-4 centered">
-                                    <img src="assets/img/teamwork.png" alt="Crowded" align="middle" height="45" width="45">
+                                    <img src="assets/img/teamwork.png" alt="Crowded" align="middle" height="42" width="42">
                                     <br>
                                     <label class="control-label"><center>Most Crowded</center></label>
                                 </div>
@@ -297,7 +297,7 @@ $avgDuration_json .= "]";
                             </div>
                             <div class="form-group">
                                 <div class="col-sm-4 col-sm-4 centered">
-                                    <img src="assets/img/leadership.png" alt="Popular Attraction" align="middle" height="45" width="45">
+                                    <img src="assets/img/leadership.png" alt="Popular Attraction" align="middle" height="42" width="42">
                                     <br>
                                     <label class="control-label"><center>Most Returning Visitor</center></label>
                                 </div>
@@ -309,7 +309,7 @@ $avgDuration_json .= "]";
                             </div>
                             <div class="form-group">
                                 <div class="col-sm-4 col-sm-4 centered">
-                                    <img src="assets/img/time.png" alt="Longest Time Spent" align="middle" height="45" width="45">
+                                    <img src="assets/img/time.png" alt="Longest Time Spent" align="middle" height="42" width="42">
                                     <br>
                                     <label class="control-label"><center>Longest Average Time Spent</center></label>
                                 </div>
