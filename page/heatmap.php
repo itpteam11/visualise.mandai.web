@@ -1,9 +1,23 @@
 <?php
 $this->layout('layout', ['title' => 'Heatmap - WRS Singapore Zoo']);
 
-$countData_json = file_get_contents('http://localhost/wrs/page/heatmap-content.php?content=countData_json');
-$planes = file_get_contents('http://localhost/wrs/page/heatmap-content.php?content=infoData_json');
-$user_json = file_get_contents('http://localhost/wrs/page/user-content.php');
+$countData_json = file_get_contents('http://localhost/visualise.mandai.web/page/heatmap-content.php?content=countData_json');
+$planes = file_get_contents('http://localhost/visualise.mandai.web/page/heatmap-content.php?content=infoData_json');
+$user_json = file_get_contents('http://localhost/visualise.mandai.web/page/user-content.php');
+?>
+
+<?php
+    require_once 'lib/firebaseLib.php';
+    
+    const DEFAULT_URL = 'https://visualise-mandai.firebaseio.com';
+    const DEFAULT_TOKEN = 'VpbdkNsaBRjyGeRPi81wW0iUFZWLKT0teehiknWH';
+    const DEFAULT_PATH = '/threshold-setting';
+    
+    $firebase = new \Firebase\FirebaseLib(DEFAULT_URL, DEFAULT_TOKEN);
+    
+    // --- reading the stored string ---
+    $threshold_json = $firebase->get(DEFAULT_PATH);
+    $threshold_array = json_decode($threshold_json, true);
 ?>
 <section class="wrapper">
     <h3><i class="fa fa-angle-right"></i>  <?= $this->e($page_title) ?></h3>
@@ -22,7 +36,7 @@ $user_json = file_get_contents('http://localhost/wrs/page/user-content.php');
     var baseLayer = L.tileLayer(
             'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> Contributors ',
-                maxZoom: 28
+                maxZoom: 25
             }
     );
 
@@ -51,6 +65,12 @@ $user_json = file_get_contents('http://localhost/wrs/page/user-content.php');
         zoom: 17,
         layers: [baseLayer, heatmapLayer]
     });
+    
+    map.bounds = [],
+            map.setMaxBounds([
+                [1.4066022132306581, 103.78974080085754],
+                [1.4008103803697847, 103.79969716072083]
+            ]);
 
     var SweetIcon = L.Icon.Label.extend({
         options: {
@@ -178,9 +198,9 @@ $user_json = file_get_contents('http://localhost/wrs/page/user-content.php');
     });
 
     //Refresh auto_load() function after 10000 milliseconds
-    setInterval(auto_load, 5000);
+    setInterval(auto_load, 100000);
     //setInterval(populate(map, users), 5000);
-    setInterval(function(){ populate(map, users); }, 5000);
+    setInterval(function(){ populate(map, users); }, 100000);
 
 //https://github.com/jacobtoye/Leaflet.iconlabel
     function getRandomLatLng(map) {
@@ -205,13 +225,25 @@ $user_json = file_get_contents('http://localhost/wrs/page/user-content.php');
                     .on('dragend', function (event) {
                         var marker = event.target;
                         var position = marker.getLatLng();
-                        alert(position);
+                        console.log(position);
                         //marker.setLatLng(originalPosition);
                         //marker.addTo(map); //originalPosition
                     });
         }
 
         return false;
+    }
+        
+    var threshold_table = L.control({position: 'bottomright'});
+        
+    threshold_table.onAdd = function (map) {
+        
+        var div = L.DomUtil.create('div', 'info threshold'),
+                threshold = [],
+                attraction = [];
+        
+        labels.push(
+                '<>')
     }
 
 </script>
