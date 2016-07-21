@@ -1,6 +1,7 @@
 <?php $this->layout('layout', ['title' => 'Dashboard - WRS Singapore Zoo']) ?>
 <?php
 //error_reporting(E_ERROR | E_PARSE);
+//Credit to "Designed by Freepik and distributed by Flaticon"
 
 require_once 'lib/Forecast.php';
 $threads = 10;
@@ -257,7 +258,7 @@ $avgDuration_json .= "]";
                 <div class="col-lg-3 col-md-3 col-sm-3 mb">
                     <div class="form-panel">
                         <div class="white-header">
-                            <h4 class="mb"><i class="fa fa-angle-right"></i> Date Selection</h4>
+                            <h3 class="mb"><i class="fa fa-angle-right"></i> Date Selection</h3>
                         </div>
 
                         <form class="form-horizontal style-form" action="" method="post">
@@ -279,35 +280,50 @@ $avgDuration_json .= "]";
                         </form>      		
                     </div><!-- /form-panel -->
                     <div class="form-panel">
-                        <h4 class="mb"><i class="fa fa-angle-right"></i> Summary</h4>
+                        <h3 class="mb"><i class="fa fa-angle-right"></i> Summary</h3>
 
                         <form class="form-horizontal style-form" action="" method="get">
                             <div class="form-group">
-                                <label class="col-sm-4 col-sm-4 control-label">Most Crowded</label>
+                                <div class="col-sm-4 col-sm-4 centered">
+                                    <img src="assets/img/teamwork.png" alt="Crowded" align="middle" height="45" width="45">
+                                    <br>
+                                    <label class="control-label"><center>Most Crowded</center></label>
+                                </div>
+                                
                                 <div class="col-sm-8 centered">
                                     <h4><?php echo $mostVisitorRegion; ?></h4>
-                                    <h5><?php echo $mostVisitorRegion_num; ?></h5>
+                                    <h5><?php echo $mostVisitorRegion_num; ?> people</h5>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-4 col-sm-4 control-label">Most Returning Visitor</label>
-                                <div class="col-sm-8 centered">
+                                <div class="col-sm-4 col-sm-4 centered">
+                                    <img src="assets/img/leadership.png" alt="Popular Attraction" align="middle" height="45" width="45">
+                                    <br>
+                                    <label class="control-label"><center>Most Returning Visitor</center></label>
+                                </div>
+                                
+                                <div class="col-sm-8 centered" vertical-align="middle">
                                     <h4><?php echo $mostReturningVisitorRegion; ?></h4>
-                                    <h5><?php echo $mostReturningVisitorRegion_num; ?></h5>
+                                    <h5><?php echo $mostReturningVisitorRegion_num; ?> people</h5>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-sm-4 col-sm-4 control-label">Longest Average Time Spent</label>
+                                <div class="col-sm-4 col-sm-4 centered">
+                                    <img src="assets/img/time.png" alt="Longest Time Spent" align="middle" height="45" width="45">
+                                    <br>
+                                    <label class="control-label"><center>Longest Average Time Spent</center></label>
+                                </div>
+                                
                                 <div class="col-sm-8 centered">
                                     <h4><?php echo $mostAvgDurationRegion; ?></h4>
-                                    <h5><?php echo $mostAvgDurationRegion_num; ?></h5>
+                                    <h5><?php echo $mostAvgDurationRegion_num; ?> sec</h5>
                                 </div>
                             </div>
                         </form>      		
                     </div><!-- /form-panel -->
 
                     <div class="content-panel">
-                        <h4><i class="fa fa-angle-right"></i> Tweet</h4>
+                        <h3><i class="fa fa-angle-right"></i> Tweet</h3>
 
                             <div class="ds">
                                 <div class="desc">
@@ -329,7 +345,7 @@ $avgDuration_json .= "]";
 
                 <div class="col-lg-9 col-md-9 col-sm-9 mb">
                     <div class="content-panel">
-                        <h4><i class="fa fa-angle-right"></i> Footfall</h4>
+                        <h3><i class="fa fa-angle-right"></i> Footfall</h3>
                         <div class="panel-body">
                             <div class="centered">
                                 <div class="btn-group">
@@ -350,7 +366,7 @@ $avgDuration_json .= "]";
 
                 <div class="col-lg-9 col-md-9 col-sm-9 mb">
                     <div class="content-panel">
-                        <h4><i class="fa fa-angle-right"></i> Weather</h4>
+                        <h3><i class="fa fa-angle-right"></i> Weather</h3>
                         <div class="panel-body">
                             <div id="chartWeather"></div>
                         </div>
