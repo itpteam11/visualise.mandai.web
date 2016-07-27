@@ -1,6 +1,5 @@
 <?php $this->layout('layout', ['title' => 'Edit User - WRS Singapore Zoo']) ?>
 <?php
-//https://firebase.google.com/docs/auth/web/manage-users
 require_once 'lib/firebaseLib.php';
 
         const DEFAULT_URL = 'https://visualise-mandai.firebaseio.com';
@@ -13,10 +12,27 @@ $userid = null;
 if (isset($_GET['id'])) {
     $userid = $_GET['id'];
 }
-// --- reading the stored string ---
+// --- reading from Firebase ---
 $user_json = $firebase->get(DEFAULT_PATH . '/' . $userid);
 $user = json_decode($user_json, true);
-//print_r($user);
+
+$userName = null;
+$userEmail = null;
+$userType = null;
+$userGroup = null;
+
+if(isset($user["name"])){
+    $userName = $user["name"];
+}
+if(isset($user["email"])){
+    $userEmail = $user["email"];
+}
+if(isset($user["type"])){
+    $userType = $user["type"];
+}
+if(isset($user["group"])){
+    $userGroup = key($user["group"]);
+}
 
 if (isset($_POST["submit"])) {
 
@@ -28,7 +44,6 @@ if (isset($_POST["submit"])) {
             "group" => array($_POST['department']=>$_POST['position'])
         );
     }
-    //die(print_r($threshold_array));
     $success = $firebase->update(DEFAULT_PATH . '/' . $userid, $user_array);
     //die(print_r($success));
 }
@@ -53,30 +68,28 @@ if (isset($_POST["submit"])) {
                 <h4 class="mb"><i class="fa fa-angle-right"></i> Existing User</h4>
                 <br>
                 <form class="form-horizontal style-form" method="post">
-
-
                     <div class="form-group">
                         <label class="col-sm-3 col-sm-3 control-label">Name</label>
                         <div class="col-sm-6">
-                            <input name="name" type="text" class="form-control" value="<?php echo $user["name"]; ?>">
+                            <input name="name" type="text" class="form-control" value="<?php echo $userName; ?>">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 col-sm-3 control-label">Email</label>
                         <div class="col-sm-6">
-                            <input name="email" type="email" class="form-control" value="<?php echo $user["email"]; ?>">
+                            <input name="email" type="email" class="form-control" value="<?php echo $userEmail; ?>">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 col-sm-3 control-label">Position</label>
                         <div class="col-sm-6">
-                            <input name="position" type="text" class="form-control" value="<?php echo $user["type"]; ?>">
+                            <input name="position" type="text" class="form-control" value="<?php echo $userType; ?>">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 col-sm-3 control-label">Department</label>
                         <div class="col-sm-6">
-                            <input name="department" type="text" class="form-control" value="<?php echo key($user["group"]); ?>">
+                            <input name="department" type="text" class="form-control" value="<?php echo $userGroup; ?>">
                         </div>
                     </div>
                     <button name="submit" type="submit" class="btn btn-theme">Update</button>
@@ -85,7 +98,4 @@ if (isset($_POST["submit"])) {
             </div>
         </div><!-- col-lg-12-->      	
     </div><!-- /row -->
-
-
-
 </section>

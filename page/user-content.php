@@ -1,4 +1,5 @@
 <?php
+
 require_once '../lib/firebaseLib.php';
 
         const DEFAULT_URL = 'https://visualise-mandai.firebaseio.com';
@@ -9,6 +10,7 @@ $firebase = new \Firebase\FirebaseLib(DEFAULT_URL, DEFAULT_TOKEN);
 
 // --- reading the stored string ---
 $user_json = $firebase->get(DEFAULT_PATH);
+
 $user_array = json_decode($user_json, true);
 
 $new_array = array();
@@ -18,6 +20,9 @@ foreach ($user_array as $key => $user) {
     $userEmail = 'NIL';
     $userGroup = 'NIL';
     $userStatus = 'off';
+    $userType = 'NIL';
+    $latitude = 0;
+    $longitude = 0;
 
     if (isset($user['name'])) {
         $userName = $user['name'];
@@ -31,17 +36,31 @@ foreach ($user_array as $key => $user) {
     if (isset($user['status'])) {
         $userStatus = $user['status'];
     }
+    if (isset($user['type'])) {
+        $userType = $user['type'];
+    }
+    if (isset($user['latitude'])) {
+        $latitude = $user['latitude'];
+    }
+    if (isset($user['longitude'])) {
+        $longitude = $user['longitude'];
+    }
 
-    $eachUser = array(
-        'userid' => $key,
-        'name' => $userName,
-        'email' => $userEmail,
-        'type' => $user['type'],
-        'group' => $userGroup,
-        'status' => $userStatus
-    );
+    // Get all users who are currently at work
+    if ($userStatus != 'off') {
+        $eachUser = array(
+            'userid' => $key,
+            'name' => $userName,
+            'email' => $userEmail,
+            'type' => $userType,
+            'group' => $userGroup,
+            'status' => $userStatus,
+            'latitude' => $latitude,
+            'longitude' => $longitude
+        );
 
-    array_push($new_array, $eachUser);
+        array_push($new_array, $eachUser);
+    }
 }
 
 //print_r($new_array);

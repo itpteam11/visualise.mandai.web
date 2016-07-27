@@ -1,5 +1,11 @@
 <?php
-//header('Content-type: application/json');
+
+require_once '../lib/firebaseLib.php';
+
+        const DEFAULT_URL = 'https://visualise-mandai.firebaseio.com';
+        const DEFAULT_TOKEN = 'VpbdkNsaBRjyGeRPi81wW0iUFZWLKT0teehiknWH';
+        const DEFAULT_PATH = '/region-setting';
+
 $apiURL = "https://api.sap.lbasense.com/CurrentSAPValuePerRegion?";
 
 $queryParameter = array(
@@ -11,49 +17,79 @@ $dataPath = $apiURL . http_build_query($queryParameter);
 $content = file_get_contents($dataPath);
 $content_array = json_decode($content, true);
 
-$regionContent_array = array(
-    array("region" => "KFC Restaurant at KidzWorld", "lat" => "1.40354", "lng" => "103.79683", "count" => 0),
-    array("region" => "Australian Outback", "lat" => "1.40580", "lng" => "103.79314", "count" => 0),
-    array("region" => "Entrance behind ticket counters", "lat" => "1.40493", "lng" => "103.79104", "count" => 0),
-    array("region" => "Ah Meng Restaurant", "lat" => "1.40415", "lng" => "103.79355", "count" => 0),
-    array("region" => "SPH Kiosk", "lat" => "1.40228", "lng" => "103.79597", "count" => 0),
-    array("region" => "WHRC", "lat" => "1.40400", "lng" => "103.79146", "count" => 0),
-    array("region" => "Amphitheatre", "lat" => "1.40460", "lng" => "103.7949", "count" => 0),
-    array("region" => "Elephant Show", "lat" => "1.40527", "lng" => "103.79565", "count" => 0),
-    array("region" => "Taxi Stand", "lat" => "1.40471", "lng" => "103.79049", "count" => 0)
-);
+$firebase = new \Firebase\FirebaseLib(DEFAULT_URL, DEFAULT_TOKEN);
 
-//var_dump($content_array);
+// --- reading the stored string ---
+$regionContent_json = $firebase->get(DEFAULT_PATH);
+$regionContent_array = json_decode($regionContent_json, true);
+
+//Shift an element "Entire Site" off the beginning of array
+array_shift($regionContent_array);
+
 $last_updated = date("F j, Y, g:i a", strtotime($content_array["date"]));
 
-$i = 0;
-foreach ($content_array["sapInformation"] as $region_array) {
-
-    $regionContent_array[$i]["count"] = $region_array["numVisitors"];
-    $i++;
-}
-
-//var_dump($regionContent_array);
 $countData_array = array();
 $infoData_array = array();
 
 $countData_json = '[';
 $infoData_json = '[';
 
-foreach($regionContent_array as $regionContent){
+$tableHTML = '<table>' .
+        '<tr><th>Region</th><th>Threshold</th></tr>';
+
+$statusMsg = null;
+
+$i = 0;
+foreach ($regionContent_array as $regionContent) {
+
+    //Start - Data for heatmap
+    //if entire site, then assign zero to visitor count as this entire site
+    //value is not available in this array and will not be shown
+    if ($i == 0) {
+        $visitorCount = 0;
+    } else {
+        $visitorCount = $content_array["sapInformation"][$i - 1]["numVisitors"];
+    }
+
     $countData_set = '{"lat":' . $regionContent["lat"];
     $countData_set .= ', "lng":' . $regionContent["lng"];
-    //$countData_set .= ", count:" . $regionContent["count"] . "}";
-    $countData_set .= ', "count":' . rand(0, 1000) . "}";
-    
+    $countData_set .= ", count:" . $visitorCount . "}";
+    //For demo purpose
+    //$countData_set .= ', "count":' . rand(0, 1000) . "}";
+
     array_push($countData_array, $countData_set);
-    
-    $infoData_set = '["<b>' . $regionContent["region"] . "</b><br>";
-    //$infoData_set .= 'Total Visitor: ' . $regionContent["count"] . '",';
-    $infoData_set .= 'Total Visitor: ' . rand(0, 1000) . '",';
-    $infoData_set .= $regionContent["lat"] . ", " . $regionContent["lng"] . "]";
+    //End - Data for heatmap
+    //Start - Data for popup
+    $infoData_set = '{"content":"<b>' . $regionContent["region"] . '</b><br>';
+    $infoData_set .= 'Total Visitor: ' . $visitorCount . '",';
+    //For demo purpose
+    //$infoData_set .= 'Total Visitor: ' . rand(0, 1000) . '",';
+    $infoData_set .= '"lat":' . $regionContent["lat"] . ', "lng":' . $regionContent["lng"] . ', ';
+    $infoData_set .= '"count":' . $visitorCount . ', "threshold":' . $regionContent_array[$i]['threshold'] . ',';
+    //if visitor count reached/exceeded the set threshold
+    if ($visitorCount >= $regionContent_array[$i]['threshold']) {
+        $statusMsg = $regionContent["region"] . ' (' . $visitorCount . '/' . $regionContent_array[$i]['threshold'] . ")\\n";
+    }
+
+    $infoData_set .= '"status":"' . $statusMsg . '"}';
     array_push($infoData_array, $infoData_set);
-}
+    $statusMsg = null;
+
+    //End - Data for popup
+    //Start - Threshold Table HTML
+    $cssColor = 'text-success';
+    if ($visitorCount >= $regionContent_array[$i]['threshold']) {
+        $cssColor = 'text-danger';
+    }
+    $tableHTML .= '<tr><td width="75%">' . $regionContent["region"] . '</td>';
+    $tableHTML .= '<td class="centered" width="25%"><span class="' . $cssColor . '">' . $visitorCount . ' / ';
+    $tableHTML .= $regionContent_array[$i]['threshold'] . '</span></td></tr>';
+    //End - Threshold Table HTML
+
+    $i++;
+} //Enf foreach
+
+$tableHTML .= '</table>';
 
 $countData_array_separated = implode(",", $countData_array);
 $infoData_array_separated = implode(",", $infoData_array);
@@ -61,29 +97,33 @@ $infoData_array_separated = implode(",", $infoData_array);
 $countData_json .= $countData_array_separated . ']';
 $infoData_json .= $infoData_array_separated . ']';
 
-if(isset($_GET["content"])){
-    switch($_GET["content"]){
+if (isset($_GET["content"])) {
+    switch ($_GET["content"]) {
         case 'last_updated':
             echo $last_updated;
             break;
-        
+
         case 'countData_json':
             echo $countData_json;
             break;
-        
+
         case 'infoData_json':
             echo $infoData_json;
             break;
-        
+
+        case 'region_json':
+            echo $regionContent_json;
+            break;
+
+        case 'threshold':
+            echo $tableHTML;
+            break;
+
         default:
             echo "Invalid query parameter passed in.";
             break;
-    }
-    
-}
-else{
+    } //End Switch    
+} else {
     echo "No query parameter passed in.";
 }
-
-
 ?>

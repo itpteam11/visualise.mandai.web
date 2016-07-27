@@ -28,7 +28,7 @@ $templates = new League\Plates\Engine('template');
 if(isset($_GET["page"])){
     switch($_GET["page"]){
         case "heatmap":
-            echo $templates->render('../page/heatmap', ['page_title' => 'Live Footfall Heatmap']);
+            echo $templates->render('../page/heatmap', ['page_title' => 'Manpower Allocation']);
             break;
         
         case "threshold":

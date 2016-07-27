@@ -43,14 +43,19 @@ $user_array = json_decode($user_json, true);
                         foreach ($user_array as $key => $user) {
                             $userName = 'NIL';
                             $userEmail = 'NIL';
+                            $userType = 'NIL';
                             $userGroup = 'NIL';
                             $userStatus = 'off';
-
+                            $userAccountStatus = 'disable';
+        
                             if (isset($user['name'])) {
                                 $userName = $user['name'];
                             }
                             if (isset($user['email'])) {
                                 $userEmail = $user['email'];
+                            }
+                            if (isset($user['type'])) {
+                                $userType = $user['type'];
                             }
                             if (isset($user['group'])) {
                                 $userGroup = key($user['group']);
@@ -58,17 +63,20 @@ $user_array = json_decode($user_json, true);
                             if (isset($user['status'])) {
                                 $userStatus = $user['status'];
                             }
+                            if (isset($user['account_status'])) {
+                                $userAccountStatus = $user['account_status'];
+                            }
                             ?>
                             <tr>
                                 <td><?php echo $userName; ?></td>
                                 <td><?php echo $userEmail; ?></td>
-                                <td><?php echo $user['type']; ?></td>
+                                <td><?php echo $userType; ?></td>
                                 <td><?php echo $userGroup; ?></td>
                                 <td><span class="label <?php echo ($userStatus == 'off') ? 'label-info' : 'label-success'; ?> label-mini"><?php echo $userStatus; ?></span></td>
-                                <td><span class="label <?php echo ($user['account_status'] == 'enable') ? 'label-success' : 'label-danger'; ?>"><?php echo $user['account_status']; ?></span></td>
+                                <td><span class="label <?php echo ($userAccountStatus == 'enable') ? 'label-success' : 'label-danger'; ?>"><?php echo $userAccountStatus; ?></span></td>
                                 <td>
                                     <a href="index.php?page=edituser&id=<?php echo $key; ?>"><button class="btn btn-primary btn-xs"><i class="fa fa-pencil"></i></button></a>
-                                    <button class="btn btn-danger btn-xs" onclick="toggleAccountStatus('<?php echo $user['account_status']; ?>', '<?php echo $userName; ?>', '<?php echo $key; ?>')"><i class="fa fa-lock"></i></button>
+                                    <button class="btn btn-danger btn-xs" onclick="toggleAccountStatus('<?php echo $userAccountStatus; ?>', '<?php echo $userName; ?>', '<?php echo $key; ?>')"><i class="fa fa-lock"></i></button>
                                 </td>
                             </tr>
                             <?php

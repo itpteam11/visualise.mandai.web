@@ -57,7 +57,6 @@ if (isset($_POST['fromDate']) && isset($_POST['toDate'])) {
     $interval = new DateInterval('P1D');
     $daterange = new DatePeriod($begin, $interval, $end);
 
-    /* Retrieve weather data */
     $daterange_array = array();
     $tempMin_array = array();
     $tempMax_array = array();
@@ -69,7 +68,6 @@ if (isset($_POST['fromDate']) && isset($_POST['toDate'])) {
     foreach ($daterange as $date) {
         $dateString = "'" . $date->format("Y-m-d") . "'";
         array_push($daterange_array, $dateString);
-
         // New DateTime Object
         $dateObject = new DateTime($date->format("Y-m-d"));
         $dateObject->add(new DateInterval('P1D'));
@@ -105,13 +103,16 @@ if (isset($_POST['fromDate']) && isset($_POST['toDate'])) {
         }
     }
 
+    //Remove the last day value as footfall won't be
+    //showing the last day value
+    array_pop($tempMin_array);
+    array_pop($tempMax_array);
+    array_pop($tempAvg_array);
+
     $daterange_separated = implode(",", $daterange_array);
     $tempMin_separated = implode(",", $tempMin_array);
     $tempMax_separated = implode(",", $tempMax_array);
     $tempAvg_separated = implode(",", $tempAvg_array);
-
-    /* End */
-
 
     $content_array = json_decode($content, true);
 
@@ -222,7 +223,7 @@ if (isset($_POST['fromDate']) && isset($_POST['toDate'])) {
     $mostAvgDurationRegion = array_search(max($regionAvgDuraton_array), $regionAvgDuraton_array);
     $mostAvgDurationRegion_num = $regionAvgDuraton_array[$mostAvgDurationRegion];
 } //End if post
-//die($daterange_separated);
+
 $date_dataset = "['x', " . $daterange_separated . "],\n";
 $totalVisitor_json = '[' . $date_dataset;
 $returningVisitor_json = '[' . $date_dataset;
@@ -234,17 +235,13 @@ for ($id = 1; $id <= 9; $id++) {
     $avgDuration_dataset[$id] = "['" . $regionName[$id] . "'," . $avgDuration_separated[$id] . "]\n";
 }
 
-$totalVisitor_json .= implode(",", $totalVisitor_dataset) . ',';
-$returningVisitor_json .= implode(",", $returningVisitor_dataset) . ',';
-$avgDuration_json .= implode(",", $avgDuration_dataset) . ',';
+$totalVisitor_json .= implode(",", $totalVisitor_dataset);
+$returningVisitor_json .= implode(",", $returningVisitor_dataset);
+$avgDuration_json .= implode(",", $avgDuration_dataset);
 
-$weather_json = "['Min. Temperature', " . $tempMin_separated . "]," .
-        "['Avg. Temperature', " . $tempAvg_separated . "]," .
-        "['Max. Temperature', " . $tempMax_separated . "]";
-
-$totalVisitor_json .= $weather_json . "]";
-$returningVisitor_json .= $weather_json . "]";
-$avgDuration_json .= $weather_json . "]";
+$totalVisitor_json .= "]";
+$returningVisitor_json .= "]";
+$avgDuration_json .= "]";
 
 $fromDate_timestamp = strtotime($fromDate);
 $toDate_timestamp = strtotime($toDate);
@@ -287,49 +284,48 @@ $toDate_timestamp = strtotime($toDate);
                     <div class="form-panel">
                         <h4 class="mb"><i class="fa fa-angle-right"></i> Summary</h4>
 
-                        <form id="score" class="form-horizontal style-form" action="" method="get">
+                        <form class="form-horizontal style-form" action="" method="get">
                             <div class="form-group">
-                                <div class="col-sm-4 col-sm-4 centered">
-                                    <img src="assets/img/teamwork.png" alt="Crowded" align="middle" height="42" width="42"><br>
-                                    <label>Most Crowded</label>
-                                </div>
-                                <div id="score" class="col-sm-8 centered">
-
+                                <label class="col-sm-4 col-sm-4 control-label">Most Crowded</label>
+                                <div class="col-sm-8 centered">
                                     <h4><?php echo $mostVisitorRegion; ?></h4>
-                                    <b><?php echo $mostVisitorRegion_num; ?> people</b>
+                                    <h5><?php echo $mostVisitorRegion_num; ?></h5>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <div class="col-sm-4 col-sm-4 centered">
-                                    <img src="assets/img/leadership.png" alt="Popular Attraction" align="middle" height="42" width="42"><br>
-                                    <label>Most Returning Visitor</label>
-                                </div>
+                                <label class="col-sm-4 col-sm-4 control-label">Most Returning Visitor</label>
                                 <div class="col-sm-8 centered">
                                     <h4><?php echo $mostReturningVisitorRegion; ?></h4>
-                                    <b><?php echo $mostReturningVisitorRegion_num; ?> people</b>
+                                    <h5><?php echo $mostReturningVisitorRegion_num; ?></h5>
                                 </div>
                             </div>
-                            <div id="score" class="form-group">
-                                <div class="col-sm-4 col-sm-4 centered">
-                                    <img src="assets/img/time.png" alt="Longest Time Spent" align="middle" height="42" width="42"><br>
-                                    <label>Longest Avg Time Spent</label>
-                                </div>
+                            <div class="form-group">
+                                <label class="col-sm-4 col-sm-4 control-label">Longest Average Time Spent</label>
                                 <div class="col-sm-8 centered">
                                     <h4><?php echo $mostAvgDurationRegion; ?></h4>
-                                    <b><?php echo $mostAvgDurationRegion_num; ?> seconds</b>
+                                    <h5><?php echo $mostAvgDurationRegion_num; ?></h5>
                                 </div>
                             </div>
                         </form>      		
                     </div><!-- /form-panel -->
 
+                    <div class="content-panel">
+                        <h4><i class="fa fa-angle-right"></i> Tweet</h4>
 
+                        <div class="ds">
+                            <div id="tweetContent" class="desc">
+
+                            </div>
+                        </div>
+
+                    </div>
 
                 </div><!-- /col-lg-4 -->
 
-                <!-- Start of second column -->
+
                 <div class="col-lg-9 col-md-9 col-sm-9 mb">
                     <div class="content-panel">
-                        <h4><i class="fa fa-angle-right"></i> Footfall with Temperature</h4>
+                        <h4><i class="fa fa-angle-right"></i> Footfall</h4>
                         <div class="panel-body">
                             <div class="centered">
                                 <div class="btn-group">
@@ -346,47 +342,16 @@ $toDate_timestamp = strtotime($toDate);
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="row">
-                        <div class="col-lg-6 col-md-6 col-sm-6 mb">
-                            <div class="content-panel">
-                                <h4><i class="fa fa-angle-right"></i> Tweet Sentiment Analysis</h4>
-                                <div id="tweetContent" class="ds pre-scrollable">
-                                    <div class="centered"><img src="assets/img/spinner.gif" alt="Loading" height="42" width="42"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 col-md-6 col-sm-6 mb">
-                            <div class="content-panel">
-                                <h4><i class="fa fa-angle-right"></i> Tweet Sentiment Summary</h4>
-                                <div class="panel-body">
-                                    <div id="chartTweet" class="centered"><img src="assets/img/spinner.gif" alt="Loading" height="42" width="42"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 col-md-6 col-sm-6 mb">
-                            <div class="content-panel">
-                                <h4><i class="fa fa-angle-right"></i> Facebook Post Sentiment Analysis</h4>
-                                <div id="fbContent" class="ds pre-scrollable">
-                                    <div class="centered"><img src="assets/img/spinner.gif" alt="Loading" height="42" width="42"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 col-md-6 col-sm-6 mb">
-                            <div class="content-panel">
-                                <h4><i class="fa fa-angle-right"></i> Facebook Sentiment Summary</h4>
-                                <div class="panel-body">
-                                    <div id="chartFacebook" class="centered"><img src="assets/img/spinner.gif" alt="Loading" height="42" width="42"></div>
-                                </div>
-                            </div>
+                <div class="col-lg-9 col-md-9 col-sm-9 mb">
+                    <div class="content-panel">
+                        <h4><i class="fa fa-angle-right"></i> Weather</h4>
+                        <div class="panel-body">
+                            <div id="chartWeather"></div>
                         </div>
                     </div>
                 </div>
-                <!-- End of second column -->
-
             </div>
         </div>
     </div>
@@ -419,7 +384,7 @@ $toDate_timestamp = strtotime($toDate);
 
     $(document).ready(function () {
         $("#btnTotalVisitor").trigger("click");
-        //$("#btnBar").trigger("click");
+        $("#btnBar").trigger("click");
     });
 
     $(".btn-group > .btn").click(function () {
@@ -431,37 +396,26 @@ $toDate_timestamp = strtotime($toDate);
     var dataDuration = <?php echo $avgDuration_json; ?>;
 
     function generateFootfallChart(chartTitle, xAxisTitle, yAxisTitle, data) {
-
         var chart = c3.generate({
             data: {
                 x: 'x',
                 columns: data,
-                type: 'bar',
-                types: {
-                    'Min. Temperature': 'spline',
-                    'Avg. Temperature': 'spline',
-                    'Max. Temperature': 'spline',
-                },
-                axes: {
-                    'Min. Temperature': 'y2',
-                    'Avg. Temperature': 'y2',
-                    'Max. Temperature': 'y2'
-                },
-                labels: {
-//            format: function (v, id, i, j) { return "Default Format"; },
-                    format: {
-                        'Min. Temperature': function (v) {
-                            return v + "°C";
-                        },
-                        'Avg. Temperature': function (v) {
-                            return v + "°C";
-                        },
-                        'Max. Temperature': function (v) {
-                            return v + "°C";
-                        }
-//                data1: function (v, id, i, j) { return "Format for data1"; },
-                    }
-                },
+                labels: false,
+                type: 'bar'
+                        /*,
+                         onclick: function (d, element) {
+                         console.log("onclick", d, element);
+                         },
+                         onmouseover: function (d) {
+                         console.log("onmouseover", d);
+                         },
+                         onmouseout: function (d) {
+                         console.log("onmouseout", d);
+                         }
+                         */
+            },
+            zoom: {
+                enabled: true
             },
             legend: {
                 position: 'bottom'
@@ -503,43 +457,113 @@ $toDate_timestamp = strtotime($toDate);
 
         return chart;
     }
+//http://stackoverflow.com/questions/24754239/how-to-change-tooltip-content-in-c3js
+    function tooltip_contents(d, defaultTitleFormat, defaultValueFormat, color) {
+        var $$ = this, config = $$.config, CLASS = $$.CLASS,
+                titleFormat = config.tooltip_format_title || defaultTitleFormat,
+                nameFormat = config.tooltip_format_name || function (name) {
+                    return name;
+                },
+                valueFormat = config.tooltip_format_value || defaultValueFormat,
+                text, i, title, value, name, bgcolor;
 
-    function generateTweeterChart(chartTitle, tweetData, chartID) {
-        var chart = c3.generate({
-            data: {
-                columns: [
-                    ['Negative', tweetData.negativeTweetsNum],
-                    ['Neutral', tweetData.neutralTweetsNum],
-                    ['Positive', tweetData.positiveTweetsNum]
-                ],
-                type: 'donut',
-                onclick: function (d, i) {
-                    console.log("onclick", d, i);
-                },
-                onmouseover: function (d, i) {
-                    console.log("onmouseover", d, i);
-                },
-                onmouseout: function (d, i) {
-                    console.log("onmouseout", d, i);
-                }
-            },
-            donut: {
-                title: chartTitle
-            },
-            bindto: chartID
-        });
+        // You can access all of data like this:
+        console.log($$.data.targets);
+
+        for (i = 0; i < d.length; i++) {
+            if (!(d[i] && (d[i].value || d[i].value === 0))) {
+                continue;
+            }
+
+            // ADD
+            if (d[i].name === 'data2') {
+                continue;
+            }
+
+            if (!text) {
+                title = 'MY TOOLTIP'
+                text = "<table class='" + CLASS.tooltip + "'>" + (title || title === 0 ? "<tr><th colspan='2'>" + title + "</th></tr>" : "");
+            }
+
+            name = nameFormat(d[i].name);
+            value = valueFormat(d[i].value, d[i].ratio, d[i].id, d[i].index);
+            bgcolor = $$.levelColor ? $$.levelColor(d[i].value) : color(d[i].id);
+
+            text += "<tr class='" + CLASS.tooltipName + "-" + d[i].id + "'>";
+            text += "<td class='name'><span style='background-color:" + bgcolor + "'></span>" + name + "</td>";
+            text += "<td class='value'>" + value + "</td>";
+            text += "</tr>";
+        }
+        return text + "</table>";
     }
 
+    var chartWeather = c3.generate({
+        data: {
+            x: 'x',
+            columns: [
+                ['x', <?php echo $daterange_separated; ?>],
+                ['Min. Temperature', <?php echo $tempMin_separated; ?>],
+                ['Avg Temperature', <?php echo $tempAvg_separated; ?>],
+                ['Max. Temperature', <?php echo $tempMax_separated; ?>]
+            ],
+            labels: true,
+            type: 'spline',
+            onclick: function (d, element) {
+                console.log("onclick", d, element);
+            },
+            onmouseover: function (d) {
+                console.log("onmouseover", d);
+            },
+            onmouseout: function (d) {
+                console.log("onmouseout", d);
+            }
+        },
+        zoom: {
+            enabled: true
+        },
+        legend: {
+            position: 'bottom'
+        },
+        title: {
+            text: 'Daily Temperature'
+        },
+        axis: {
+            x: {
+                label: {
+                    text: 'Date',
+                    position: 'outer-center',
+                    type: 'categorized'
+                },
+                type: 'timeseries',
+                tick: {
+                    //format: function (x) {
+                    //    return x + 1;
+                    //}
+                    //format: function (x) { return x.getFullYear(); }
+                    format: '%Y-%m-%d' // format string is also available for timeseries data
+                }
+            },
+            y: {
+                label: {
+                    text: 'Temperature in Celsius',
+                    position: 'outer-middle'
+                }
+            }
+        },
+        bar: {
+            width: {
+                ratio: 0.7,
+//            max: 30
+            },
+        },
+        tooltip: {
+            contents: tooltip_contents
+        },
+        bindto: '#chartWeather'
+    });
+
     $("#btnBar").click(function () {
-        chart.transform('bar', ['KFC Restaurant at KidzWorld',
-            'Australian Outback',
-            'Entrance behind ticket counters',
-            'Ah Meng Restaurant',
-            'SPH Kiosk',
-            'WHRC',
-            'Amphitheatre',
-            'Elephant Show',
-            'Taxi Stand']);
+        chart.transform('bar');
     });
 
     $("#btnLine").click(function () {
@@ -602,132 +626,31 @@ $toDate_timestamp = strtotime($toDate);
             .startAt(<?php echo $fromDate_timestamp; ?>)
             .endAt(<?php echo $toDate_timestamp; ?>)
             .once('value').then(function (snapshot) {
-        var totalTweetsNum = snapshot.numChildren();
         var tweetObj = snapshot.val();
 
-        var positiveTweetsNum = 0;
-        var neutralTweetsNum = 0;
-        var negativeTweetsNum = 0;
 
         var htmlContent = '';
-        var sentimentImg = '<img src="assets/img/neutral.png" alt="Neutral" height="22" width="22">';
         if (tweetObj != null) {
             for (var i = 0; i < tweetObj.length; i++) {
                 //console.log(tweetObj[i].Tweet);
-                switch (tweetObj[i].Sentiment) {
-                    case 'Positive':
-                        positiveTweetsNum++;
-                        sentimentImg = '<img src="assets/img/happy.png" alt="Happy" height="22" width="22">';
-                        break;
-
-                    case 'Negative':
-                        negativeTweetsNum++;
-                        break;
-
-                    case 'Neutral':
-                        neutralTweetsNum++;
-                        sentimentImg = '<img src="assets/img/sad.png" alt="Sad" height="22" width="22">';
-                        break;
-
-                    default:
-                        break;
-                }
-
-                htmlContent += '<div class="desc"><div class="thumb">';
-                htmlContent += sentimentImg;
+                htmlContent += '<div class="thumb">';
+                htmlContent += '<span class="badge bg-theme"><i class="fa fa-clock-o"></i></span>';
                 htmlContent += '</div>';
                 htmlContent += '<div class="details">';
                 htmlContent += '<p><muted>' + tweetObj[i].Date_Created + '</muted><br>';
                 htmlContent += tweetObj[i].Tweet + '<br>';
-                htmlContent += '</p></div></div>';
+                htmlContent += '</p></div>';
             }
         }
         else {
-            htmlContent += '<div class="details centered">';
-            htmlContent += '<p><img src="assets/img/twitter-128.png" width="16" height="16"> ';
-            htmlContent += 'No Tweet during this period.</p></div>';
-        }
-        $('#tweetContent').html(htmlContent);
-
-        if (totalTweetsNum > 0) {
-            var tweetData = {'positiveTweetsNum': positiveTweetsNum,
-                'negativeTweetsNum': negativeTweetsNum,
-                'neutralTweetsNum': neutralTweetsNum};
-            //alert(tweetData.neutralTweetsNum);
-
-            generateTweeterChart('Tweet Sentiment', tweetData, '#chartTweet');
-        } else {
-            htmlContent = '<p><img src="assets/img/twitter-128.png" width="16" height="16"> No Tweet during this period.</p>';
-            $('#chartTweet').html(htmlContent);
-        }
-    });
-
-
-    firebase.database().ref("/facebook/")
-            .orderByChild('Timestamp')
-            .startAt(<?php echo $fromDate_timestamp; ?>)
-            .endAt(<?php echo $toDate_timestamp; ?>)
-            .once('value').then(function (snapshot) {
-        var totalFbPostNum = snapshot.numChildren();
-        var fbObj = snapshot.val();
-
-        var positivePostNum = 0;
-        var neutralPostNum = 0;
-        var negativePostNum = 0;
-
-        var htmlContent = '';
-        var sentimentImg = '<img src="assets/img/neutral.png" alt="Neutral" height="22" width="22">';
-        if (fbObj != null) {
-            for (var i = 0; i < fbObj.length; i++) {
-
-                switch (fbObj[i].Sentiment) {
-                    case 'Positive':
-                        positivePostNum++;
-                        sentimentImg = '<img src="assets/img/happy.png" alt="Happy" height="22" width="22">';
-                        break;
-
-                    case 'Negative':
-                        negativePostNum++;
-                        sentimentImg = '<img src="assets/img/sad.png" alt="Sad" height="22" width="22">';
-                        break;
-
-                    case 'Neutral':
-                        neutralPostNum++;
-                        break;
-
-                    default:
-                        break;
-                }
-
-                htmlContent += '<div class="desc"><div class="thumb">';
-                htmlContent += sentimentImg;
+                htmlContent += '<div class="thumb">';
+                htmlContent += '<span class="badge bg-theme"><i class="fa fa-clock-o"></i></span>';
                 htmlContent += '</div>';
                 htmlContent += '<div class="details">';
-                htmlContent += '<p><muted>' + fbObj[i].PostedDate + '</muted><br>';
-                htmlContent += fbObj[i]['PostText '] + '<br>';
-                htmlContent += '</p></div></div>';
-            }
+                htmlContent += '<p>No Tweets during this period.<br>';
+                htmlContent += '</p></div>';
         }
-        else {
-            htmlContent += '<div class="details centered">';
-            htmlContent += '<p><img src="assets/img/square-facebook-128.png" width="16" height="16"> ';
-            htmlContent += 'No Post during this period.</p></div>';
-        }
-        $('#fbContent').html(htmlContent);
-
-        if (totalFbPostNum > 0) {
-            var postData = {'positiveTweetsNum': positivePostNum,
-                'negativeTweetsNum': negativePostNum,
-                'neutralTweetsNum': neutralPostNum};
-            //alert(postData.neutralTweetsNum);
-
-            generateTweeterChart('Facebook Sentiment', postData, '#chartFacebook');
-        }
-        else {
-            htmlContent = '<p><img src="assets/img/square-facebook-128.png" width="16" height="16"> No Post during this period.</p>';
-            $('#chartFacebook').html(htmlContent);
-        }
+        $('#tweetContent').html(htmlContent);
+        console.log(htmlContent);
     });
-
-
 </script>
