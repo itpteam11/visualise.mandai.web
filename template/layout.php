@@ -1,3 +1,30 @@
+<?php
+/*
+ * Function for using CSS style to highlight current menu
+ */
+function isCurrentPage($pageName = null) {
+    $className = 'class="active"';
+    if (isset($_GET['page'])) {
+        $currentPageName = $_GET['page'];
+        if ($pageName == $currentPageName) {
+            return $className;
+        } elseif ($pageName == 'admin') {
+            switch ($currentPageName) {
+                case 'threshold':
+                case 'userlist':
+                    return $className;
+                    break;
+                default:
+                    break;
+            }
+        }
+    } elseif ($pageName == 'dashboard') {
+        return $className;
+    }
+    //else
+    return null;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -45,6 +72,9 @@
 
         <script src="assets/js/leaflet-iconlabel/Icon.Label.js"></script>
         <script src="assets/js/leaflet-iconlabel/Icon.Label.Default.js"></script>
+        
+        <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+        <script src="assets/js/firebase-setting.js"></script>
     </head>
 
     <body>
@@ -83,25 +113,25 @@
                             <p class="centered"><img src="assets/img/logo.svg" width="60"></p>
                         </li>
                         <li class="mt">
-                            <a href="index.php" class="active">
+                            <a href="index.php" <?php echo isCurrentPage('dashboard'); ?>>
                                 <i class="fa fa-bar-chart-o"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
                         <li>
-                            <a href="index.php?page=heatmap">
+                            <a href="index.php?page=heatmap" <?php echo isCurrentPage('heatmap'); ?>>
                                 <i class="fa fa-users"></i>
                                 <span>Manpower Allocation</span>
                             </a>
                         </li>
 
                         <li class="sub-menu">
-                            <a href="#">
+                            <a href="#" <?php echo isCurrentPage('admin'); ?>>
                                 <i class="fa fa-cogs"></i>
                                 <span>Admin Tool</span>
                             </a>
                             <ul class="sub">
-                                <li><a href="index.php?page=threshold">Treshold Setting</a></li>
+                                <li><a href="index.php?page=threshold">Threshold Setting</a></li>
                                 <li><a href="index.php?page=userlist">Manage User</a></li>
                             </ul>
                         </li>
@@ -116,14 +146,14 @@
             *********************************************************************************************************************************************************** -->
             <!--main content start-->
             <section id="main-content">
-                <?= $this->section('content') ?>
+<?= $this->section('content') ?>
             </section>
             <!--main content end-->
 
             <!--footer start-->
             <footer class="site-footer">
                 <div class="text-center">
-                    <?php echo date("Y"); ?> - Visualizing Mandai
+<?php echo date("Y"); ?> - Visualize Mandai
                     <a href="#" class="go-top">
                         <i class="fa fa-angle-up"></i>
                     </a>

@@ -1,14 +1,10 @@
 <?php $this->layout('layout', ['title' => 'Manage User - WRS Singapore Zoo']) ?>
 <?php
 require_once 'lib/firebaseLib.php';
-
-        const DEFAULT_URL = 'https://visualise-mandai.firebaseio.com';
-        const DEFAULT_TOKEN = 'VpbdkNsaBRjyGeRPi81wW0iUFZWLKT0teehiknWH';
+require_once 'page/constant/firebase-setting.php';
         const DEFAULT_PATH = '/user';
 
-$firebase = new \Firebase\FirebaseLib(DEFAULT_URL, DEFAULT_TOKEN);
-
-// --- reading the stored string ---
+// --- reading all users ---
 $user_json = $firebase->get(DEFAULT_PATH);
 $user_array = json_decode($user_json, true);
 ?>
@@ -23,8 +19,6 @@ $user_array = json_decode($user_json, true);
                     <div class="col-md-10"><h4><i class="fa fa-angle-right"></i> Users</h4></div>
                     <div class="col-md-2 text-center"><a href="index.php?page=adduser"><button type="button" class="btn btn-theme"><i class="fa fa-plus"></i> Add User</button></a></div>
                 </div>
-
-
                 <hr>
                 <table class="table table-striped table-advance table-hover">
                     <thead>
@@ -47,7 +41,7 @@ $user_array = json_decode($user_json, true);
                             $userGroup = 'NIL';
                             $userStatus = 'off';
                             $userAccountStatus = 'disable';
-        
+
                             if (isset($user['name'])) {
                                 $userName = $user['name'];
                             }
@@ -80,7 +74,6 @@ $user_array = json_decode($user_json, true);
                                 </td>
                             </tr>
                             <?php
-                            //next($user_array);
                         }
                         ?>
                     </tbody>
@@ -88,21 +81,8 @@ $user_array = json_decode($user_json, true);
             </div><!-- /content-panel -->
         </div><!-- /col-md-12 -->
     </div><!-- /row -->
-    
-    <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+
     <script>
-        // Initialize Firebase
-        var config = {
-            apiKey: "AIzaSyDHk-JZlTUWkaYv9l-1h2qNTAss_S-lzoc",
-            authDomain: "visualise-mandai.firebaseapp.com",
-            databaseURL: "https://visualise-mandai.firebaseio.com",
-            storageBucket: "",
-        };
-        firebase.initializeApp(config);
-
-        // Get a reference to the database service
-        var database = firebase.database().ref("/");
-
         function toggleAccountStatus(accountStatus, username, userid) {
             var msg;
             var statusVerb = 'enable';
@@ -112,17 +92,28 @@ $user_array = json_decode($user_json, true);
             var question = "Are you sure you want to " + statusVerb + " " + username + "'s account?";
 
             if (confirm(question) == true) {
+                // Get a reference to the database service
+                var database = firebase.database().ref("/");
+
                 var updates = {};
                 updates['/user/' + userid + '/account_status'] = statusVerb;
+                msg = firebase.database().ref().update(updates, onComplete);
 
-                firebase.database().ref().update(updates);
-                location.reload();
             } else {
                 msg = "No change has been made.";
             }
-            
-            //console.log(success);
+            //console.log(msg);
         }
-    </script>
 
+        var onComplete = function (error) {
+            if (error) {
+                //console.log('Synchronization failed');
+            } else {
+                //console.log('Synchronization succeeded');
+                location.reload();
+            }
+        };
+
+
+    </script>
 </section>

@@ -2276,8 +2276,13 @@ g {
 }
 
 #tweetContent, #fbContent{
-    min-height: 57px;
-    max-height: 420px;
+    min-height: 58px;
+    max-height: 350px;
+}
+
+#chartTweet, #chartFacebook{
+    /*min-height: 33px;
+    max-height: 350px;*/
 }
 
 /* Heatmap */

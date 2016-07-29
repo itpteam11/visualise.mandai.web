@@ -4,10 +4,12 @@ $this->layout('layout', ['title' => 'Heatmap - WRS Singapore Zoo']);
 //$_SERVER['HTTP_HOST'] == 'localhost:8080'
 //$_SERVER['SERVER_NAME'] == 'localhost'
 $baseURL = 'http://' . $_SERVER['HTTP_HOST'] . '/wrs/page/';
+
 $countData_json = file_get_contents($baseURL . 'heatmap-content.php?content=countData_json');
 $planes = file_get_contents($baseURL . 'heatmap-content.php?content=infoData_json');
 $user_json = file_get_contents($baseURL . 'user-content.php');
 $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_json');
+//die(print_r($countData_json));
 ?>
 <section class="wrapper">
     <h3><i class="fa fa-angle-right"></i>  <?= $this->e($page_title) ?></h3>
@@ -18,30 +20,20 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
 </section>
 
 <!--script for this page-->
-<script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
 <script>
-
     $(document).ready(function () {
 
-        /* http://stackoverflow.com/questions/9912145/leaflet-how-to-find-existing-markers-and-delete-markers */
-        //var markers = new L.FeatureGroup();
-        //markers.bindPopup("<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odio. Quisque volutpat mattis eros. Nullam malesuada erat ut turpis. Suspendisse urna nibh, viverra non, semper suscipit, posuere a, pede.</p><p>Donec nec justo eget felis facilisis fermentum. Aliquam porttitor mauris sit amet orci. Aenean dignissim pellentesque.</p>");
-        //map.addLayer(markers);
+        /* Get all JSON data on first load */
         countData_json = <?php echo $countData_json; ?>;
         planes = <?php echo $planes; ?>;
         users = <?php echo $user_json; ?>;
-        // Initialize Firebase
-        var config = {
-            apiKey: "AIzaSyDHk-JZlTUWkaYv9l-1h2qNTAss_S-lzoc",
-            authDomain: "visualise-mandai.firebaseapp.com",
-            databaseURL: "https://visualise-mandai.firebaseio.com",
-            storageBucket: "",
-        };
-        firebase.initializeApp(config);
-        // Get a reference to the database service
-        database = firebase.database().ref("/");
+        
+        //To keep track of user markers
         userMarkers_arr = [];
+        //To keep track of assigned location marker
         markerAssigned = [];
+        
+        /* Define Leaflet and Heatmap setting */
         var baseLayer = L.tileLayer(
                 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> Contributors ',
@@ -70,6 +62,9 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
             layers: [baseLayer, heatmapLayer]
         });
         map.zoomControl.setPosition('topright');
+        /* End */
+        
+        /* Define all the icon setting */
         var MarkerIcon = L.Icon.extend({
             options: {
                 iconSize: [38, 38],
@@ -99,7 +94,9 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
                 wrapperAnchor: new L.Point(12, 13)
             }
         });
-        // control that shows state info on hover
+        /* End */
+        
+        /* Control that shows state info on hover */
         var info = L.control({position: 'topleft'});
         info.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
@@ -111,24 +108,28 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
                     '<div class="centered"><img src="assets/img/spinner.gif" alt="Loading" height="42" width="42"></div>';
         };
         info.addTo(map);
-
+        /* End */
+        
         //Start - Call those functions when DOM is Ready
         populateRegionMarker(map, planes);
-        populate(map, users, true);
-        auto_load();
+        populateUserMarker(map, users, true);
+        loadJSON();
         //End
 
-        //Start - Refresh those functions function after 10000 milliseconds
-        setInterval(auto_load, 60000);
-        setInterval(function () {
-            populateRegionMarker(map, planes);
-        }, 60000);
-        setInterval(function () {
-            populate(map, users, false);
-        }, 60000);
-        //End
     });
-    function auto_load() {
+
+    //Start - Refresh those functions function after 60000 milliseconds
+    var countdownInterval = 60000;
+    setInterval(loadJSON, countdownInterval);
+    setInterval(function () {
+        populateRegionMarker(map, planes);
+    }, countdownInterval);
+    setInterval(function () {
+        populateUserMarker(map, users, false);
+    }, countdownInterval);
+    //End
+
+    function loadJSON() {
         //To get last updated time
         $.ajax({
             url: "page/heatmap-content.php?content=last_updated",
@@ -181,33 +182,18 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
                 //alert(JSON.stringify(toArray(users)));
             }
         });
-        //For heatmap
+        /* For heatmap */
         countData = {
             max: 8,
             data: countData_json
         };
         heatmapLayer.setData(countData);
-        // make accessible for debugging
-        //layer = heatmapLayer;
-        //End for heatmap
+        /* End */
 
     } //End auto_load()
 
-
-//https://github.com/jacobtoye/Leaflet.iconlabel
-    function getRandomLatLng(map) {
-        var bounds = map.getBounds(),
-                southWest = bounds.getSouthWest(),
-                northEast = bounds.getNorthEast(),
-                lngSpan = northEast.lng - southWest.lng,
-                latSpan = northEast.lat - southWest.lat;
-        return new L.LatLng(
-                southWest.lat + latSpan * Math.random(),
-                southWest.lng + lngSpan * Math.random()
-                );
-    }
     function populateRegionMarker(map, planes) {
-        var notify = false;
+        var notifyFlag = false;
         var alertMsg = "The following region(s) exceeded the threshold:\n";
         markers_arr = [];
         //Iterate all the region to add info to popup panel
@@ -233,24 +219,23 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
             markers_arr.push(marker);
             if (planes[i].status != '') {
                 alertMsg += '- ' + planes[i].status;
-                notify = true;
+                notifyFlag = true;
             }
         } //End for loop
 
         //Send notification if above threshold
-        if (notify == true) {
-            //alertMsg += 'Last Update: ' + new Date(new Date().getTime()).toLocaleTimeString();
-            //alert(alertMsg);
-
-            firebase.database().ref("/user/")
-                    .orderByChild('type')
-                    //.equalTo('staff')
+        if (notifyFlag == true) {
+            /* Query to get all users that are logged in */
+            database = firebase.database().ref("/user/")
+                    .orderByChild('status')
+                    .equalTo('working')
                     .once('value').then(function (snapshot) {
 
                 //If there is at least a user
                 if (snapshot.numChildren() > 0) {
                     var userObj = snapshot.val();
                     // Get a key for a new Notification.
+                    var database = firebase.database().ref();
                     var newNotificationKey = database.child('notification').push().key;
                     //console.log('New notification key is ' + newNotificationKey);
 
@@ -261,20 +246,19 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
                     updates['/notification/' + newNotificationKey + '/content'] = alertMsg;
                     updates['/notification/' + newNotificationKey + '/timestamp'] = firebase.database.ServerValue.TIMESTAMP;
                     firebase.database().ref().update(updates);
-                    //Iterate all the users    
+                    //Iterate and send to all the users    
                     for (var userID in userObj) {
-                        console.log(userID);
+                        //alert(alertMsg);
                         var updates = {};
                         updates['/notification-lookup/' + userID + '/receive/' + newNotificationKey] = false;
                         firebase.database().ref().update(updates);
                     }
-
-                }
+                }// End if
             });
         } // End if
     }
 
-    function populate(map, users, firstRun) {
+    function populateUserMarker(map, users, firstRun) {
         //if this function is called second time, then remove all the user markers
         if (firstRun == false) {
             for (i = 0; i < userMarkers_arr.length; i++) {
@@ -308,7 +292,7 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
 
                 var assignedRegion = getNearestRegion(newPosition.lat, newPosition.lng);
 
-                //If it is a valid region
+                //If it is a valid region, then prompt dialog box
                 if (assignedRegion != 'Outside region') {
 
                     var question = 'Do you want to assign ' + marker.username + ' to ' + assignedRegion + '?';
@@ -319,24 +303,16 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
                     //if user click on 'OK' in the prompt dialog             
                     if (notificationMsg != null) {
 
-                        if (marker.userID in markerAssigned) {
-                            map.removeLayer(markerAssigned[marker.userID]);
-                        }
-                        markerAssigned[marker.userID] = new L.Marker(
-                                newPosition,
-                                {icon: new staffAssignedIcon({labelText: "Assigned to " + marker.username}), riseOnHover: true}
-                        ).addTo(map); // End Marker
-
-
+                        var database = firebase.database().ref();
                         var updates = {};
-                        updates['/user/' + markerStaff.userID + '/assigned_region'] = assignedRegion;
-                        updates['/user/' + markerStaff.userID + '/assigned_lat'] = newPosition.lat;
-                        updates['/user/' + markerStaff.userID + '/assigned_lng'] = newPosition.lng;
-                        updates['/user/' + markerStaff.userID + '/assigned_timestamp'] = firebase.database.ServerValue.TIMESTAMP;
-                        firebase.database().ref().update(updates);
+                        updates['/user/' + marker.userID + '/assigned_region'] = assignedRegion;
+                        updates['/user/' + marker.userID + '/assigned_lat'] = newPosition.lat;
+                        updates['/user/' + marker.userID + '/assigned_lng'] = newPosition.lng;
+                        updates['/user/' + marker.userID + '/assigned_timestamp'] = firebase.database.ServerValue.TIMESTAMP;
+                        database.update(updates);
                         // Get a key for a new Notification.
                         var newNotificationKey = database.child('notification').push().key;
-                        console.log('New notification key is ' + newNotificationKey);
+                        //console.log('New notification key is ' + newNotificationKey);
                         var updates = {};
                         updates['/notification-lookup/' + marker.userID + '/receive/' + newNotificationKey] = false;
                         updates['/notification/' + newNotificationKey + '/sender'] = 'SG Zoo';
@@ -345,27 +321,46 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
                         updates['/notification/' + newNotificationKey + '/latitude'] = newPosition.lat;
                         updates['/notification/' + newNotificationKey + '/longitude'] = newPosition.lng;
                         updates['/notification/' + newNotificationKey + '/timestamp'] = firebase.database.ServerValue.TIMESTAMP;
-                        firebase.database().ref().update(updates);
-                        alert('A notification has been sent.');
-                        //alert(markerStaff.username + ' has been assigned to ' + assignedRegion + ' and a message has been sent.');
+                        firebase.database().ref().update(updates, onComplete);
+
+                        //if there is existing assignment marker, then remove it.
+                        if (marker.userID in markerAssigned) {
+                            map.removeLayer(markerAssigned[marker.userID]);
+                        }
+
+                        //add a new location assigned marker on the map
+                        markerAssigned[marker.userID] = new L.Marker(
+                                newPosition,
+                                {icon: new staffAssignedIcon({labelText: "Assigned to " + marker.username}), riseOnHover: true, zIndexOffset: 100}
+                        ).addTo(map); // End Marker
+
+                        var onComplete = function (error, username, assignedRegion) {
+                            if (error) {
+                                //console.log('Synchronization failed');
+                                alert("An error has just occurred, please try again.");
+                            } else {
+                                //console.log('Synchronization succeeded');
+                                alert("A notification has been sent.");
+                            }
+                        };
                     } //End if
                 }
                 //Not a valid region
                 else {
-                    //Reset the marker back to original position
-                    //markerStaff.setLatLng(originalPosition);
                     alert('This is not a valid region, please try dragging near to the marker again.');
                 }
-                //Reset the marker back to original position
-                populate(map, users, false);
+                
+                //Reset the marker back to original position no matter what
+                populateUserMarker(map, users, false);
             }); //End Marker Dragend event
 
-            //console.log(marker.username);
+            //Push the markerStaff object to keep reference
             userMarkers_arr.push(markerStaff);
         } //End for loop
 
         return false;
     } //End function populate
+
     /*
      * Base on Haversine Formula to get distance between 2 lat lng coordinates
      * Reference http://www.codecodex.com/wiki/Calculate_Distance_Between_Two_Points_on_a_Globe#JavaScript
@@ -398,4 +393,20 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
         //else
         return 'Outside region';
     }
+    
+    /*
+     * For random assignment of Lat Lng bound to the visible view of map
+     */
+    function getRandomLatLng(map) {
+        var bounds = map.getBounds(),
+                southWest = bounds.getSouthWest(),
+                northEast = bounds.getNorthEast(),
+                lngSpan = northEast.lng - southWest.lng,
+                latSpan = northEast.lat - southWest.lat;
+        return new L.LatLng(
+                southWest.lat + latSpan * Math.random(),
+                southWest.lng + lngSpan * Math.random()
+                );
+    }
+    
 </script>

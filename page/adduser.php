@@ -1,12 +1,8 @@
 <?php $this->layout('layout', ['title' => 'Add User - WRS Singapore Zoo']) ?>
 <?php
 require_once 'lib/firebaseLib.php';
-
-        const DEFAULT_URL = 'https://visualise-mandai.firebaseio.com';
-        const DEFAULT_TOKEN = 'VpbdkNsaBRjyGeRPi81wW0iUFZWLKT0teehiknWH';
+require_once 'page/constant/firebase-setting.php';
         const DEFAULT_PATH = '/user';
-
-$firebase = new \Firebase\FirebaseLib(DEFAULT_URL, DEFAULT_TOKEN);
 
 if (isset($_POST['uid'])) {
     $userid = $_POST['uid'];
@@ -91,21 +87,8 @@ if (isset($_POST['uid'])) {
             </div>
         </div><!-- col-lg-12-->      	
     </div><!-- /row -->
-    <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+
     <script>
-        // Initialize Firebase
-        var config = {
-            apiKey: "AIzaSyDHk-JZlTUWkaYv9l-1h2qNTAss_S-lzoc",
-            //apiKey: "VpbdkNsaBRjyGeRPi81wW0iUFZWLKT0teehiknWH",
-            authDomain: "visualise-mandai.firebaseapp.com",
-            databaseURL: "https://visualise-mandai.firebaseio.com",
-            storageBucket: "",
-        };
-        firebase.initializeApp(config);
-
-        // Get a reference to the database service
-        var database = firebase.database().ref("/");
-
         $("#add").click(function (event) {
 
             var userName = $('#addUserForm').find('input[name="name"]').val();
@@ -113,7 +96,9 @@ if (isset($_POST['uid'])) {
             var userPassword = $('#addUserForm').find('input[name="password"]').val();
             var userPosition = $('#addUserForm').find('input[name="position"]').val();
             var userDepartment = $('#addUserForm').find('input[name="department"]').val();
-
+            // Get a reference to the database service
+            var database = firebase.database().ref("/");
+        
             firebase.auth().createUserWithEmailAndPassword(userEmail, userPassword).then(function () {
                 // Create successful.
                 var user = firebase.auth().currentUser;
@@ -129,8 +114,6 @@ if (isset($_POST['uid'])) {
 
                     // Set the uid value to a hidden field
                     $('#addUserForm').find('input[name="uid"]').val(uid);
-                    alert(uid);
-
                 }
                 //Submit the form after successful insertion
                 $("#addUserForm").submit();

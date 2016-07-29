@@ -1,51 +1,56 @@
 <?php $this->layout('layout', ['title' => 'Edit User - WRS Singapore Zoo']) ?>
 <?php
 require_once 'lib/firebaseLib.php';
-
-        const DEFAULT_URL = 'https://visualise-mandai.firebaseio.com';
-        const DEFAULT_TOKEN = 'VpbdkNsaBRjyGeRPi81wW0iUFZWLKT0teehiknWH';
+require_once 'page/constant/firebase-setting.php';
         const DEFAULT_PATH = '/user';
 
-$firebase = new \Firebase\FirebaseLib(DEFAULT_URL, DEFAULT_TOKEN);
-
 $userid = null;
+$userName = 'NIL';
+$userEmail = 'NIL';
+$userType = 'NIL';
+$userGroup = 'NIL';
+
 if (isset($_GET['id'])) {
     $userid = $_GET['id'];
 }
-// --- reading from Firebase ---
+
+//If form is submitted
+if (isset($_POST["submit"])) {
+
+    if (empty($_POST["position"]) == false) {
+        $userType = $_POST["position"];
+    }
+    if (empty($_POST["department"]) == false) {
+        $userGroup = $_POST["department"];
+        //die('t');
+    }
+
+    $user_array = array(
+        "name" => $_POST['name'],
+        "email" => $_POST['email'],
+        "type" => $userType,
+        "group" => array($userGroup => $userType)
+    );
+
+    $serverMsg = $firebase->update(DEFAULT_PATH . '/' . $userid, $user_array);
+    //For debugging purpose
+    //die(print_r($user_array));
+}
+// --- reading a user from Firebase ---
 $user_json = $firebase->get(DEFAULT_PATH . '/' . $userid);
 $user = json_decode($user_json, true);
 
-$userName = null;
-$userEmail = null;
-$userType = null;
-$userGroup = null;
-
-if(isset($user["name"])){
+if (isset($user["name"])) {
     $userName = $user["name"];
 }
-if(isset($user["email"])){
+if (isset($user["email"])) {
     $userEmail = $user["email"];
 }
-if(isset($user["type"])){
+if (isset($user["type"])) {
     $userType = $user["type"];
 }
-if(isset($user["group"])){
+if (isset($user["group"])) {
     $userGroup = key($user["group"]);
-}
-
-if (isset($_POST["submit"])) {
-
-    foreach ($_POST as $key => $value) {
-        $user_array = array(
-            "name" => $_POST['name'],
-            "email" => $_POST['email'],
-            "type" => $_POST['position'],
-            "group" => array($_POST['department']=>$_POST['position'])
-        );
-    }
-    $success = $firebase->update(DEFAULT_PATH . '/' . $userid, $user_array);
-    //die(print_r($success));
 }
 ?>
 
@@ -71,13 +76,13 @@ if (isset($_POST["submit"])) {
                     <div class="form-group">
                         <label class="col-sm-3 col-sm-3 control-label">Name</label>
                         <div class="col-sm-6">
-                            <input name="name" type="text" class="form-control" value="<?php echo $userName; ?>">
+                            <input name="name" type="text" class="form-control" value="<?php echo $userName; ?>" required>
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-3 col-sm-3 control-label">Email</label>
                         <div class="col-sm-6">
-                            <input name="email" type="email" class="form-control" value="<?php echo $userEmail; ?>">
+                            <input name="email" type="email" class="form-control" value="<?php echo $userEmail; ?>" readonly="" required>
                         </div>
                     </div>
                     <div class="form-group">

@@ -1,19 +1,14 @@
 <?php
-
 require_once '../lib/firebaseLib.php';
-
-        const DEFAULT_URL = 'https://visualise-mandai.firebaseio.com';
-        const DEFAULT_TOKEN = 'VpbdkNsaBRjyGeRPi81wW0iUFZWLKT0teehiknWH';
+require_once 'constant/firebase-setting.php';
         const DEFAULT_PATH = '/user';
 
-$firebase = new \Firebase\FirebaseLib(DEFAULT_URL, DEFAULT_TOKEN);
-
-// --- reading the stored string ---
+// --- reading all user ---
 $user_json = $firebase->get(DEFAULT_PATH);
 
 $user_array = json_decode($user_json, true);
 
-$new_array = array();
+$userFormatted_array = array();
 
 foreach ($user_array as $key => $user) {
     $userName = 'NIL';
@@ -59,10 +54,9 @@ foreach ($user_array as $key => $user) {
             'longitude' => $longitude
         );
 
-        array_push($new_array, $eachUser);
+        array_push($userFormatted_array, $eachUser);
     }
 }
 
-//print_r($new_array);
-echo json_encode($new_array, true);
+echo json_encode($userFormatted_array, true);
 ?>

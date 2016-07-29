@@ -1,19 +1,10 @@
 <?php
-
 require_once '../lib/firebaseLib.php';
-
-        const DEFAULT_URL = 'https://visualise-mandai.firebaseio.com';
-        const DEFAULT_TOKEN = 'VpbdkNsaBRjyGeRPi81wW0iUFZWLKT0teehiknWH';
+require_once 'constant/firebase-setting.php';
+require_once 'constant/lbasense-setting.php';
         const DEFAULT_PATH = '/region-setting';
 
-$apiURL = "https://api.sap.lbasense.com/CurrentSAPValuePerRegion?";
-
-$queryParameter = array(
-    'user' => 'sitstudents',
-    'pass' => 'aiurldd952jeu49r',
-    'siteId' => '282');
-
-$dataPath = $apiURL . http_build_query($queryParameter);
+$dataPath = getSAPValuePerRegionURL_api();
 $content = file_get_contents($dataPath);
 $content_array = json_decode($content, true);
 
