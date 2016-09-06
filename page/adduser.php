@@ -81,7 +81,7 @@ if (isset($_POST['uid'])) {
                             <input name="department" type="text" class="form-control" value="">
                         </div>
                     </div>
-                    <button id="add" name="add" type="submit" class="btn btn-theme">Add</button>
+                    <button id="add" name="add" type="submit" class="btn btn-theme ladda-button" data-style="expand-right" data-color="red" data-size="xs">Add</button>
                     <a href="index.php?page=userlist"><button type="button" class="btn btn-info">Back</button></a>
                 </form>
             </div>

@@ -2,6 +2,7 @@
 /*
  * Function for using CSS style to highlight current menu
  */
+
 function isCurrentPage($pageName = null) {
     $className = 'class="active"';
     if (isset($_GET['page'])) {
@@ -45,6 +46,7 @@ function isCurrentPage($pageName = null) {
         <!-- Firefox, Chrome, Safari, IE 11+ and Opera. 196x196 pixels in size. -->
         <link rel="icon" href="assets/logo.ico">
 
+        <link href="assets/css/pace.css" rel="stylesheet">
         <!-- Bootstrap core CSS -->
         <link href="assets/css/bootstrap.css" rel="stylesheet">
         <!--external css-->
@@ -58,8 +60,11 @@ function isCurrentPage($pageName = null) {
 
         <link href="assets/css/c3.min.css" rel="stylesheet">
         <link href="assets/css/leaflet.css" rel="stylesheet" >
-
         <link href="assets/css/Icon.Label.css" rel="stylesheet" />
+
+        <link href="assets/css/ladda.min.css" rel="stylesheet" />
+
+        <script src="assets/js/pace.min.js"></script>
 
         <script src="assets/js/jquery-1.8.3.min.js"></script>
         <script src="assets/js/jquery-ui/jquery-ui.min.js"></script>
@@ -72,9 +77,16 @@ function isCurrentPage($pageName = null) {
 
         <script src="assets/js/leaflet-iconlabel/Icon.Label.js"></script>
         <script src="assets/js/leaflet-iconlabel/Icon.Label.Default.js"></script>
-        
+
         <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
         <script src="assets/js/firebase-setting.js"></script>
+
+        <style>
+            /* For Donut Chart */
+            .c3-chart-arc text {
+                fill: #000;
+            }
+        </style>
     </head>
 
     <body>
@@ -94,7 +106,7 @@ function isCurrentPage($pageName = null) {
 
                 <div class="top-menu">
                     <ul class="nav pull-right top-menu">
-                        <!--<li><a class="logout" href="login.html">Logout</a></li>-->
+                        <li><a class="logout" href="logout.php">Logout</a></li>
                     </ul>
                 </div>
             </header>
@@ -146,14 +158,14 @@ function isCurrentPage($pageName = null) {
             *********************************************************************************************************************************************************** -->
             <!--main content start-->
             <section id="main-content">
-<?= $this->section('content') ?>
+                <?= $this->section('content') ?>
             </section>
             <!--main content end-->
 
             <!--footer start-->
             <footer class="site-footer">
                 <div class="text-center">
-<?php echo date("Y"); ?> - Visualize Mandai
+                    <?php echo date("Y"); ?> - Visualize Mandai
                     <a href="#" class="go-top">
                         <i class="fa fa-angle-up"></i>
                     </a>
@@ -167,9 +179,15 @@ function isCurrentPage($pageName = null) {
         <script class="include" type="text/javascript" src="assets/js/jquery.dcjqaccordion.2.7.js"></script>
         <script src="assets/js/jquery.scrollTo.min.js"></script>
         <script src="assets/js/jquery.nicescroll.js" type="text/javascript"></script>
-        <!--<script src="assets/js/jquery.sparkline.js"></script>-->
 
         <!--common script for all pages-->
         <script src="assets/js/common-scripts.js"></script>
+
+        <script src="assets/js/spin.min.js"></script>
+        <script src="assets/js/ladda.min.js"></script>
+        <script>
+            // Automatically trigger the loading animation on click
+            Ladda.bind('button[type=submit]');
+        </script>
     </body>
 </html>

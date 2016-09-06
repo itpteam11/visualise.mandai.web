@@ -1,6 +1,8 @@
 <?php
 $this->layout('layout', ['title' => 'Heatmap - WRS Singapore Zoo']);
 
+$errorFlag = FALSE;
+
 //$_SERVER['HTTP_HOST'] == 'localhost:8080'
 //$_SERVER['SERVER_NAME'] == 'localhost'
 $baseURL = 'http://' . $_SERVER['HTTP_HOST'] . '/wrs/page/';
@@ -9,11 +11,17 @@ $countData_json = file_get_contents($baseURL . 'heatmap-content.php?content=coun
 $planes = file_get_contents($baseURL . 'heatmap-content.php?content=infoData_json');
 $user_json = file_get_contents($baseURL . 'user-content.php');
 $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_json');
-//die(print_r($countData_json));
+//die(var_dump($countData_json));
+if ($countData_json == '[]') {
+    $errorFlag = TRUE;
+}
 ?>
 <section class="wrapper">
     <h3><i class="fa fa-angle-right"></i>  <?= $this->e($page_title) ?></h3>
     <!-- page start-->
+    <?php if ($errorFlag == TRUE) { ?>
+        <div class="alert alert-danger">Sorry, the server is down.</div>
+    <?php } ?>
     <p>Last Updated: <span id="last_updated">NIL</span></p>
     <div id="map"></div>
     <!-- page end-->
@@ -27,12 +35,12 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
         countData_json = <?php echo $countData_json; ?>;
         planes = <?php echo $planes; ?>;
         users = <?php echo $user_json; ?>;
-        
+
         //To keep track of user markers
         userMarkers_arr = [];
         //To keep track of assigned location marker
         markerAssigned = [];
-        
+
         /* Define Leaflet and Heatmap setting */
         var baseLayer = L.tileLayer(
                 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -63,7 +71,7 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
         });
         map.zoomControl.setPosition('topright');
         /* End */
-        
+
         /* Define all the icon setting */
         var MarkerIcon = L.Icon.extend({
             options: {
@@ -95,7 +103,7 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
             }
         });
         /* End */
-        
+
         /* Control that shows state info on hover */
         var info = L.control({position: 'topleft'});
         info.onAdd = function (map) {
@@ -109,7 +117,7 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
         };
         info.addTo(map);
         /* End */
-        
+
         //Start - Call those functions when DOM is Ready
         populateRegionMarker(map, planes);
         populateUserMarker(map, users, true);
@@ -119,7 +127,7 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
     });
 
     //Start - Refresh those functions function after 60000 milliseconds
-    var countdownInterval = 60000;
+    var countdownInterval = 30000;
     setInterval(loadJSON, countdownInterval);
     setInterval(function () {
         populateRegionMarker(map, planes);
@@ -184,7 +192,6 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
         });
         /* For heatmap */
         countData = {
-            max: 8,
             data: countData_json
         };
         heatmapLayer.setData(countData);
@@ -349,7 +356,7 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
                 else {
                     alert('This is not a valid region, please try dragging near to the marker again.');
                 }
-                
+
                 //Reset the marker back to original position no matter what
                 populateUserMarker(map, users, false);
             }); //End Marker Dragend event
@@ -393,7 +400,7 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
         //else
         return 'Outside region';
     }
-    
+
     /*
      * For random assignment of Lat Lng bound to the visible view of map
      */
@@ -408,5 +415,5 @@ $region_json = file_get_contents($baseURL . 'heatmap-content.php?content=region_
                 southWest.lng + lngSpan * Math.random()
                 );
     }
-    
+
 </script>

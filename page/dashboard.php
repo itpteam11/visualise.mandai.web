@@ -4,12 +4,37 @@ require_once 'lib/Forecast.php';
 require_once 'page/constant/forecast-setting.php';
 require_once 'page/constant/lbasense-setting.php';
 
+$errorFlag = FALSE;
+$totalDayNum = 'NIL';
+$mostVisitorRegion = 'NIL';
+$mostReturningVisitorRegion = 'NIL';
+$mostAvgDurationRegion = 'NIL';
+
+$mostVisitorRegion_num = 'NIL';
+$mostReturningVisitorRegion_num = 'NIL';
+$mostAvgDurationRegion_num = 'NIL';
+
+$daterange_json = NULL;
+$tempMin_json = NULL;
+$tempAvg_json = NULL;
+$tempMax_json = NULL;
+$numVisitors_arrayAll = NULL;
+$numReturningVisitors_arrayAll = NULL;
+$avgDuration_arrayAll = NULL;
+
 /* Get all the region name via DRFC API call */
 $dataPath = getAllRegionURL_api();
 $regionName_json = file_get_contents($dataPath);
+
+if ($regionName_json == FALSE) {
+    //There is an error in accessing the API URL
+    $errorFlag = TRUE;
+}
+
 $regionName = json_decode($regionName_json);
 $regionName = get_object_vars($regionName);
 $regionNameNoKey_json = json_encode(array_values($regionName));
+
 /* End */
 
 /* Set default date for the past 7 days */
@@ -22,7 +47,7 @@ function sec_to_time($seconds) {
     $minutes = floor($seconds % 3600 / 60);
     $seconds = $seconds % 60;
 
-    if($hours > 0){
+    if ($hours > 0) {
         return sprintf("%d Hr %02d Min %02d Sec", $hours, $minutes, $seconds);
     }
     //else
@@ -36,7 +61,7 @@ if (!isset($_POST['fromDate']) && !isset($_POST['toDate'])) {
 }
 
 //Based on user date range input
-if (isset($_POST['fromDate']) && isset($_POST['toDate'])) {
+if (isset($_POST['fromDate']) && isset($_POST['toDate']) && $errorFlag == FALSE) {
     $fromDate = $_POST['fromDate'];
     $toDate = $_POST['toDate'];
 
@@ -165,6 +190,7 @@ if (isset($_POST['fromDate']) && isset($_POST['toDate'])) {
         $totalVisitor = 0;
         $totalReturningVisitor = 0;
         $totalAvgDuration = 0;
+        $allAvgDuration_array = array();
         //Iterate all the value of each date for a single region
         foreach ($region_array['summaryStats'] as $regionDate_array) {
 
@@ -176,10 +202,15 @@ if (isset($_POST['fromDate']) && isset($_POST['toDate'])) {
             $totalVisitor += $regionDate_array['numVisitors'];
             $totalReturningVisitor += $regionDate_array['numReturningVisitors'];
             $totalAvgDuration += $regionDate_array['avgDuration'];
+            array_push($allAvgDuration_array, $regionDate_array['avgDuration']);
         }
         $regionTotalVisitor_array[$regionName] = $totalVisitor;
         $regionReturningVisitor_array[$regionName] = $totalReturningVisitor;
-        $regionAvgDuraton_array[$regionName] = $totalAvgDuration;
+
+        //Get the total value which is incorrect
+        //$regionAvgDuraton_array[$regionName] = $totalAvgDuration;
+
+        $regionAvgDuraton_array[$regionName] = $allAvgDuration_array;
 
         //push each region array value into all container array
         array_push($numVisitors_arrayAll, $numVisitors_array);
@@ -188,7 +219,6 @@ if (isset($_POST['fromDate']) && isset($_POST['toDate'])) {
 
         $i++;
     }//End foreach
-    
     //Remove the first region "Entire Site"
     array_shift($numVisitors_arrayAll);
     array_shift($numReturningVisitors_arrayAll);
@@ -196,7 +226,7 @@ if (isset($_POST['fromDate']) && isset($_POST['toDate'])) {
     array_shift($regionTotalVisitor_array);
     array_shift($regionReturningVisitor_array);
     array_shift($regionAvgDuraton_array);
-    
+
     //Start - Sum up the total to be displayed in "Summary" section
     //Find out the highest value in the array
     $mostVisitorRegion = array_search(max($regionTotalVisitor_array), $regionTotalVisitor_array);
@@ -206,10 +236,8 @@ if (isset($_POST['fromDate']) && isset($_POST['toDate'])) {
     $mostReturningVisitorRegion_num = $regionReturningVisitor_array[$mostReturningVisitorRegion];
 
     $mostAvgDurationRegion = array_search(max($regionAvgDuraton_array), $regionAvgDuraton_array);
-    //Get the total value which is incorrect
-    //$mostAvgDurationRegion_num = $regionAvgDuraton_array[$mostAvgDurationRegion];
-    //Find the highest value
-    $mostAvgDurationRegion_num = max($avgDuration_array);
+    $mostAvgDurationRegion_num = max($regionAvgDuraton_array[$mostAvgDurationRegion]);
+
     //End
 } //End if post
 
@@ -238,9 +266,12 @@ $toDate_timestamp = strtotime($toDate);
     <h3><i class="fa fa-angle-right"></i> <?= $this->e($page_title) ?></h3>
     <!-- page start-->
     <div class="row mt">
-        <div class="col-lg-12">
-            <!-- -- 1st ROW OF PANELS ---->
+        <div class="col-lg-12">            
             <div class="row">
+                <?php if ($errorFlag == TRUE) { ?>
+                    <div class="col-lg-12 col-md-12 col-sm-12"><div class="alert alert-danger">Sorry, the server is down.</div></div>
+                <?php } ?>
+
                 <div class="col-lg-3 col-md-3 col-sm-3 mb">
                     <div class="form-panel">
                         <div class="white-header">
@@ -250,17 +281,17 @@ $toDate_timestamp = strtotime($toDate);
                             <div class="form-group">
                                 <label class="col-sm-2 col-sm-2 control-label">From </label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" name="fromDate" id="txtFromDate" value="<?php echo $fromDate; ?>">
+                                    <input type="text" class="form-control" name="fromDate" id="txtFromDate" value="<?php echo $fromDate; ?>" readonly />
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="col-sm-2 col-sm-2 control-label">To </label>
                                 <div class="col-sm-10">
-                                    <input type="text" class="form-control" name="toDate" id="txtToDate" value="<?php echo $toDate; ?>">
+                                    <input type="text" class="form-control" name="toDate" id="txtToDate" value="<?php echo $toDate; ?>" readonly />
                                 </div>
                             </div>
                             <div class="steps">
-                                <input type="submit" value="Go">
+                                <button id="btnGo" type="submit" class="ladda-button" data-style="expand-right" data-color="red" data-size="s"><span class="ladda-label">Go</span></button>
                             </div>
                         </form>      		
                     </div><!-- /form-panel -->
@@ -707,8 +738,8 @@ $toDate_timestamp = strtotime($toDate);
                 type: 'donut',
                 colors: {
                     'Negative': '#ff0000',
-                    'Neutral': '#00ff00',
-                    'Positive': '#ffff00'
+                    'Neutral': '#fedf00',
+                    'Positive': '#00ff00'
                 }
             },
             tooltip: {
@@ -764,5 +795,4 @@ $toDate_timestamp = strtotime($toDate);
 
         return converted_date;
     }
-
 </script>

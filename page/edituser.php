@@ -97,7 +97,7 @@ if (isset($user["group"])) {
                             <input name="department" type="text" class="form-control" value="<?php echo $userGroup; ?>">
                         </div>
                     </div>
-                    <button name="submit" type="submit" class="btn btn-theme">Update</button>
+                    <button name="submit" type="submit" class="btn btn-theme ladda-button" data-style="expand-right" data-color="red" data-size="xs">Update</button>
                     <a href="index.php?page=userlist"><button type="button" class="btn btn-info">Back</button></a>
                 </form>
             </div>

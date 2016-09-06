@@ -1,4 +1,12 @@
 <?php
+session_start();
+
+if(!isset($_SESSION["userid"])){
+    header('Location: login.php');
+}
+// Turn off error reporting
+error_reporting(0);
+// Turn off the default time limit of 30 seconds for script processing
 set_time_limit(0);
 
 //http://stackoverflow.com/questions/22388647/how-to-use-a-php-library-with-namespacing-without-composer-as-dependency
@@ -19,14 +27,16 @@ function __autoload($className)
 
 }
 
-
 // Create new Plates instance
 $templates = new League\Plates\Engine('template');
 
-// Render a template
-
+// Render a template based on the menu link clicked
 if(isset($_GET["page"])){
     switch($_GET["page"]){
+        case "login":
+            echo $templates->render('../page/login', ['page_title' => 'User Login']);
+            break;
+        
         case "heatmap":
             echo $templates->render('../page/heatmap', ['page_title' => 'Manpower Allocation']);
             break;

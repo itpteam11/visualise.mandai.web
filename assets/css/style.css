@@ -2246,6 +2246,15 @@ label {
 }
 
 /* Dashboard */
+#txtFromDate, #txtToDate{
+    background-color: white;
+    cursor: pointer;
+}
+
+#btnGo{
+    width: 100%;
+}
+
 #chartFootfall {
     margin-top: 15px;
 }
@@ -2273,6 +2282,10 @@ label {
 
 g {
     margin-top: 30px;
+}
+
+.c3-chart-arc text {
+    fill: #000 !important;
 }
 
 #tweetContent, #fbContent{
@@ -2330,4 +2343,9 @@ g {
     float: left;
     margin-right: 8px;
     opacity: 0.7;
+}
+
+/* All page */
+.ladda-button{
+    min-width: 80px;
 }

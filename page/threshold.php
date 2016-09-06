@@ -6,9 +6,14 @@ require_once 'page/constant/lbasense-setting.php';
 
         const DEFAULT_PATH = '/region-setting';
 
+$errorFlag = FALSE;
 $dataPath = getAllRegionURL_api();
 $content = file_get_contents($dataPath);
 $content_array = json_decode($content, true);
+
+if ($content == FALSE) {
+    $errorFlag = TRUE;
+}
 
 // --- reading all threshold value ---
 $threshold_content = $firebase->get(DEFAULT_PATH);
@@ -50,28 +55,36 @@ if (isset($_POST["submit"])) {
 
     <!-- BASIC FORM ELELEMNTS -->
     <div class="row mt">
-        <div class="col-lg-5">
-            <div class="form-panel">
-                <h4 class="mb"><i class="fa fa-angle-right"></i> Current Threshold</h4>
-                <form class="form-horizontal style-form" method="post">
-                    <?php
-                    foreach ($content_array as $key => $region) {
-                        // --- reading the stored string ---
-                        $threshold = $firebase->get(DEFAULT_PATH . '/' . $key . '/threshold');
-                        ?>
-
-                        <div class="form-group">
-                            <label class="col-sm-6 col-sm-6 control-label"><?php echo $region; ?></label>
-                            <div class="col-sm-3">
-                                <input name="<?php echo $key; ?>" type="number" class="form-control" min="0" required value=<?php echo $threshold; ?>>
-                            </div>
-                        </div>
-                        <?php
-                    }
-                    ?>
-                    <button name="submit" type="submit" class="btn btn-theme">Set Threshold</button>
-                </form>
+        <?php if ($errorFlag == TRUE) { ?>
+            <div class="col-lg-12">
+                <div class="alert alert-danger">Sorry, the server is down.</div>
             </div>
-        </div><!-- col-lg-12-->      	
+        <?php
+        } else {
+            ?>
+            <div class="col-lg-5">
+                <div class="form-panel">
+                    <h4 class="mb"><i class="fa fa-angle-right"></i> Current Threshold</h4>
+                    <form class="form-horizontal style-form" method="post">
+                        <?php
+                        foreach ($content_array as $key => $region) {
+                            // --- reading the stored string ---
+                            $threshold = $firebase->get(DEFAULT_PATH . '/' . $key . '/threshold');
+                            ?>
+
+                            <div class="form-group">
+                                <label class="col-sm-6 col-sm-6 control-label"><?php echo $region; ?></label>
+                                <div class="col-sm-3">
+                                    <input name="<?php echo $key; ?>" type="number" class="form-control" min="0" required value=<?php echo $threshold; ?>>
+                                </div>
+                            </div>
+                            <?php
+                        }
+                        ?>
+                        <button name="submit" type="submit" class="btn btn-theme ladda-button" data-style="expand-right" data-color="red" data-size="s">Set Threshold</button>
+                    </form>
+                </div>
+            </div><!-- col-lg-12-->
+        <?php } ?>        
     </div><!-- /row -->
 </section>
